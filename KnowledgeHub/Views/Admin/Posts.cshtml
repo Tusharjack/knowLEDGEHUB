@@ -1,0 +1,175 @@
+﻿@model IEnumerable<KnowledgeHub.Models.Post>
+
+@{
+    ViewData["Title"] = "Posts";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">Posts</h2>
+
+            <p class="text-muted">Manage your blog posts</p>
+
+        </div>
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle"></i>
+
+            Create Post
+
+        </a>
+
+    </div>
+
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-body">
+
+            <div class="row mb-4">
+
+                <div class="col-md-5">
+
+                    <input class="form-control"
+                           placeholder="Search posts...">
+
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th width="100">Image</th>
+
+                            <th>Title</th>
+
+                            <th>Status</th>
+
+                            <th width="180">Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+
+                                <td colspan="4"
+                                    class="text-center text-muted py-5">
+
+                                    No Posts Found
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        @foreach (var post in Model)
+                        {
+
+                            <tr>
+
+                                <td>
+
+                                    @if (!string.IsNullOrEmpty(post.ImageUrl))
+                                    {
+                                        <img src="@post.ImageUrl"
+                                             width="70"
+                                             height="50"
+                                             class="rounded"
+                                             style="object-fit:cover;">
+                                    }
+                                    else
+                                    {
+                                        <img src="https://placehold.co/70x50"
+                                             class="rounded">
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    <strong>@post.Title</strong>
+
+                                    <br>
+
+                                    <small class="text-muted">
+
+                                        @post.Slug
+
+                                    </small>
+
+                                </td>
+
+                                <td>
+
+                                    @if (post.IsPublished)
+                                    {
+                                        <span class="badge bg-success">
+
+                                            Published
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+
+                                            Draft
+
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@post.Id"
+                                       class="btn btn-warning btn-sm">
+
+                                        <i class="bi bi-pencil"></i>
+
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@post.Id"
+                                       onclick="return confirm('Delete this post?');"
+                                       class="btn btn-danger btn-sm">
+
+                                        <i class="bi bi-trash"></i>
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

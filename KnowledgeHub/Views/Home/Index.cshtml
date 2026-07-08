@@ -1,0 +1,182 @@
+﻿@model IEnumerable<KnowledgeHub.Models.Post>
+
+@{
+    ViewData["Title"] = "KnowledgeHub";
+}
+
+<div class="container py-5">
+
+    <!-- Hero Section -->
+    <div class="text-center mb-5">
+
+        <h1 class="display-4 fw-bold">
+            📚 Welcome to KnowledgeHub
+        </h1>
+
+        <p class="lead text-muted">
+            Discover articles, tutorials, programming tips and the latest technology updates.
+        </p>
+
+        <div class="row justify-content-center mt-4">
+
+            <div class="col-lg-6">
+
+                <div class="input-group shadow">
+
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input type="text"
+                           class="form-control border-start-0"
+                           placeholder="Search articles..." />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-lg text-center p-5">
+
+            <img src="https://placehold.co/200x200?text=📚"
+                 width="150"
+                 class="mx-auto mb-3" />
+
+            <h3>No Blog Posts Yet</h3>
+
+            <p class="text-muted">
+                Your published blogs will appear here.
+            </p>
+
+        </div>
+    }
+    else
+    {
+
+        <div class="row g-4">
+
+            @foreach (var post in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+
+                    <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden">
+
+                        @if (!string.IsNullOrEmpty(post.ImageUrl))
+                        {
+                            <img src="@post.ImageUrl"
+                                 class="card-img-top"
+                                 style="height:230px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <img src="https://placehold.co/600x350?text=KnowledgeHub"
+                                 class="card-img-top"
+                                 style="height:230px;object-fit:cover;" />
+                        }
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span class="badge bg-primary">
+                                    Blog
+                                </span>
+
+                                <small class="text-muted">
+
+                                    @post.CreatedAt.ToString("dd MMM yyyy")
+
+                                </small>
+
+                            </div>
+
+                            <h4 class="fw-bold">
+
+                                @post.Title
+
+                            </h4>
+
+                            <p class="text-muted">
+
+                                @(string.IsNullOrEmpty(post.ShortDescription)
+                                    ? "No description available."
+                                    : post.ShortDescription)
+
+                            </p>
+
+                            @if (!string.IsNullOrWhiteSpace(post.Tags))
+                            {
+                                <div class="mb-3">
+
+                                    @foreach (var tag in post.Tags.Split(','))
+                                    {
+                                        <span class="badge bg-light text-dark border me-1 mb-1">
+
+                                            #@tag.Trim()
+
+                                        </span>
+                                    }
+
+                                </div>
+                            }
+
+                        </div>
+
+                        <div class="card-footer bg-white border-0">
+
+                            <a asp-controller="Home"
+                               asp-action="Details"
+                               asp-route-id="@post.Id"
+                               class="btn btn-primary w-100">
+
+                                Read Full Article
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    }
+
+</div>
+
+<style>
+
+    .card {
+        transition: .3s;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,.15) !important;
+        }
+
+    .card-img-top {
+        transition: .4s;
+    }
+
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    .badge {
+        border-radius: 20px;
+    }
+
+    .input-group {
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+</style>
