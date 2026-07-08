@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 **/.classpath
 **/.dockerignore
 **/.env
@@ -28,3 +29,11 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+=======
+bin/
+obj/
+.vs/
+.git/
+.gitignore
+Dockerfile
+>>>>>>> 82beee1104f3d5a48447f8a638223f5a2074a3a8
