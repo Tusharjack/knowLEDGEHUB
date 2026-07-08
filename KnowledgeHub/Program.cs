@@ -1,10 +1,31 @@
 using Dapper;
 using KnowledgeHub.Data;
 using KnowledgeHub.Repositories;
+using Npgsql;
 
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Debug startup
+Console.WriteLine("========== STARTUP ==========");
+Console.WriteLine($"Environment : {builder.Environment.EnvironmentName}");
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine($"Connection String Found : {!string.IsNullOrEmpty(connectionString)}");
+
+try
+{
+    using var testConnection = new NpgsqlConnection(connectionString);
+    testConnection.Open();
+    Console.WriteLine("✅ Successfully connected to Supabase.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("❌ DATABASE CONNECTION FAILED");
+    Console.WriteLine(ex.ToString());
+}
 
 // Add MVC services
 builder.Services.AddControllersWithViews();
@@ -30,6 +51,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
