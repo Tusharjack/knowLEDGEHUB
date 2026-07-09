@@ -1,4 +1,4 @@
-﻿using KnowledgeHub.Models;
+using KnowledgeHub.Models;
 using KnowledgeHub.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,12 +31,10 @@ namespace KnowledgeHub.Controllers
                 model.Password == "Tushar@0220")
             {
                 HttpContext.Session.SetString("Admin", "LoggedIn");
-
                 return RedirectToAction("Dashboard");
             }
 
             ViewBag.Error = "Invalid Email or Password";
-
             return View(model);
         }
 
@@ -70,52 +68,60 @@ namespace KnowledgeHub.Controllers
 
         //================ CREATE ===================
 
-      [HttpPost]
-public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
-{
-    if (HttpContext.Session.GetString("Admin") == null)
-        return RedirectToAction("Login");
-
-    // Generate slug if empty
-    if (string.IsNullOrWhiteSpace(post.Slug))
-    {
-        post.Slug = post.Title
-            .Trim()
-            .ToLower()
-            .Replace(" ", "-");
-    }
-
-    // Make slug unique
-    post.Slug += "-" + Guid.NewGuid().ToString("N").Substring(0, 6);
-
-    if (ImageFile != null && ImageFile.Length > 0)
-    {
-        string uploadsFolder = Path.Combine(
-            _environment.WebRootPath,
-            "uploads");
-
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        string fileName =
-            Guid.NewGuid() +
-            Path.GetExtension(ImageFile.FileName);
-
-        string filePath =
-            Path.Combine(uploadsFolder, fileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        [HttpGet]
+        public IActionResult Create()
         {
-            await ImageFile.CopyToAsync(stream);
+            if (HttpContext.Session.GetString("Admin") == null)
+                return RedirectToAction("Login");
+
+            return View();
         }
 
-        post.ImageUrl = "/uploads/" + fileName;
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
+        {
+            if (HttpContext.Session.GetString("Admin") == null)
+                return RedirectToAction("Login");
 
-    await _postRepository.AddAsync(post);
+            if (string.IsNullOrWhiteSpace(post.Slug))
+            {
+                post.Slug = post.Title
+                    .Trim()
+                    .ToLower()
+                    .Replace(" ", "-");
+            }
 
-    return RedirectToAction("Posts");
-}
+            // Make slug unique
+            post.Slug += "-" + Guid.NewGuid().ToString("N").Substring(0, 6);
+
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(
+                    _environment.WebRootPath,
+                    "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                string fileName =
+                    Guid.NewGuid().ToString() +
+                    Path.GetExtension(ImageFile.FileName);
+
+                string filePath =
+                    Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                post.ImageUrl = "/uploads/" + fileName;
+            }
+
+            await _postRepository.AddAsync(post);
+
+            return RedirectToAction("Posts");
+        }
 
         //================ EDIT ===================
 
@@ -145,8 +151,11 @@ public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
                     _environment.WebRootPath,
                     "uploads");
 
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
                 string fileName =
-                    Guid.NewGuid() +
+                    Guid.NewGuid().ToString() +
                     Path.GetExtension(ImageFile.FileName);
 
                 string filePath =
@@ -219,7 +228,6 @@ public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-
             return RedirectToAction("Login");
         }
     }
