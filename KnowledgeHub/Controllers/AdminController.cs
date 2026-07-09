@@ -70,49 +70,52 @@ namespace KnowledgeHub.Controllers
 
         //================ CREATE ===================
 
-        [HttpGet]
-        public IActionResult Create()
-        {
-            if (HttpContext.Session.GetString("Admin") == null)
-                return RedirectToAction("Login");
+      [HttpPost]
+public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
+{
+    if (HttpContext.Session.GetString("Admin") == null)
+        return RedirectToAction("Login");
 
-            return View();
+    // Generate slug if empty
+    if (string.IsNullOrWhiteSpace(post.Slug))
+    {
+        post.Slug = post.Title
+            .Trim()
+            .ToLower()
+            .Replace(" ", "-");
+    }
+
+    // Make slug unique
+    post.Slug += "-" + Guid.NewGuid().ToString("N").Substring(0, 6);
+
+    if (ImageFile != null && ImageFile.Length > 0)
+    {
+        string uploadsFolder = Path.Combine(
+            _environment.WebRootPath,
+            "uploads");
+
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        string fileName =
+            Guid.NewGuid() +
+            Path.GetExtension(ImageFile.FileName);
+
+        string filePath =
+            Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await ImageFile.CopyToAsync(stream);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(Post post, IFormFile? ImageFile)
-        {
-            if (HttpContext.Session.GetString("Admin") == null)
-                return RedirectToAction("Login");
+        post.ImageUrl = "/uploads/" + fileName;
+    }
 
-            if (ImageFile != null && ImageFile.Length > 0)
-            {
-                string uploadsFolder = Path.Combine(
-                    _environment.WebRootPath,
-                    "uploads");
+    await _postRepository.AddAsync(post);
 
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                string fileName =
-                    Guid.NewGuid() +
-                    Path.GetExtension(ImageFile.FileName);
-
-                string filePath =
-                    Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await ImageFile.CopyToAsync(stream);
-                }
-
-                post.ImageUrl = "/uploads/" + fileName;
-            }
-
-            await _postRepository.AddAsync(post);
-
-            return RedirectToAction("Posts");
-        }
+    return RedirectToAction("Posts");
+}
 
         //================ EDIT ===================
 
