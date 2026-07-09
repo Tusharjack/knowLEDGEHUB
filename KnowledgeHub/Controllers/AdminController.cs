@@ -62,7 +62,6 @@ namespace KnowledgeHub.Controllers
                 return RedirectToAction("Login");
 
             var posts = await _postRepository.GetAllAsync();
-
             return View(posts);
         }
 
@@ -83,40 +82,17 @@ namespace KnowledgeHub.Controllers
             if (HttpContext.Session.GetString("Admin") == null)
                 return RedirectToAction("Login");
 
+            // Generate slug if empty
             if (string.IsNullOrWhiteSpace(post.Slug))
             {
-                post.Slug = post.Title
-                    .Trim()
-                    .ToLower()
-                    .Replace(" ", "-");
+                post.Slug = post.Title.Trim().ToLower().Replace(" ", "-");
             }
 
             // Make slug unique
             post.Slug += "-" + Guid.NewGuid().ToString("N").Substring(0, 6);
 
-            if (ImageFile != null && ImageFile.Length > 0)
-            {
-                string uploadsFolder = Path.Combine(
-                    _environment.WebRootPath,
-                    "uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                string fileName =
-                    Guid.NewGuid().ToString() +
-                    Path.GetExtension(ImageFile.FileName);
-
-                string filePath =
-                    Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await ImageFile.CopyToAsync(stream);
-                }
-
-                post.ImageUrl = "/uploads/" + fileName;
-            }
+            // IMAGE UPLOAD DISABLED FOR RENDER
+            post.ImageUrl = null;
 
             await _postRepository.AddAsync(post);
 
@@ -145,29 +121,8 @@ namespace KnowledgeHub.Controllers
             if (HttpContext.Session.GetString("Admin") == null)
                 return RedirectToAction("Login");
 
-            if (ImageFile != null && ImageFile.Length > 0)
-            {
-                string uploadsFolder = Path.Combine(
-                    _environment.WebRootPath,
-                    "uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                string fileName =
-                    Guid.NewGuid().ToString() +
-                    Path.GetExtension(ImageFile.FileName);
-
-                string filePath =
-                    Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await ImageFile.CopyToAsync(stream);
-                }
-
-                post.ImageUrl = "/uploads/" + fileName;
-            }
+            // IMAGE UPLOAD DISABLED
+            // Existing ImageUrl will remain unchanged.
 
             await _postRepository.UpdateAsync(post);
 
@@ -181,24 +136,7 @@ namespace KnowledgeHub.Controllers
             if (HttpContext.Session.GetString("Admin") == null)
                 return RedirectToAction("Login");
 
-            var post = await _postRepository.GetByIdAsync(id);
-
-            if (post != null)
-            {
-                if (!string.IsNullOrEmpty(post.ImageUrl))
-                {
-                    string imagePath = Path.Combine(
-                        _environment.WebRootPath,
-                        post.ImageUrl.TrimStart('/'));
-
-                    if (System.IO.File.Exists(imagePath))
-                    {
-                        System.IO.File.Delete(imagePath);
-                    }
-                }
-
-                await _postRepository.DeleteAsync(id);
-            }
+            await _postRepository.DeleteAsync(id);
 
             return RedirectToAction("Posts");
         }
